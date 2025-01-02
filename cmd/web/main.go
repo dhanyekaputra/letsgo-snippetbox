@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -13,12 +14,15 @@ func main() {
 	//VALUE IN POINTER
 	addr := flag.String("addr", ":4000", "HTTP Network Address")
 
-	//importantly we use flag.Parse func to parse command-line flag
-	//this read the command line flag and assign to addr
-	//this should be called before using addr var
-	//otherwise the value will always be ":4000"
-	//error will be terminated
 	flag.Parse()
+
+	//use log.net to create a logger for writing info message
+	//3 param: destination, string, additional info to input
+	//flag joined using OR operator
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+
+	//instead, use stderr as destination, and Lshortfile to include relevant file
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	mux := http.NewServeMux()
 
@@ -30,9 +34,16 @@ func main() {
 	mux.HandleFunc("/snippet/view", snippetview)
 	mux.HandleFunc("/snippet/create", snippetcreate)
 
-	//value is a pointer, so we need to dereference the pointer
-	log.Println("Starting server on %s", *addr)
-	err := http.ListenAndServe(*addr, mux)
-	log.Fatal(err)
+	// initialize a new http.server struct. we set the addr and handler fields
+	// so that the server uses the same network address and routed ass before
+	// errorlog used is errorLog we created before
+	srv := &http.Server{
+		Addr:     *addr,
+		ErrorLog: errorLog,
+		Handler:  mux,
+	}
+	infoLog.Printf("Starting server on %s", *addr)
+	err := srv.ListenAndServe()
+	errorLog.Fatal(err)
 
 }
