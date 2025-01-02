@@ -8,7 +8,9 @@ import (
 	"text/template"
 )
 
-func home(w http.ResponseWriter, r *http.Request) {
+// define handler so its defined as a method
+// against struct *application
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
@@ -40,7 +42,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 // snippetview handleer function
-func snippetview(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
@@ -51,7 +53,7 @@ func snippetview(w http.ResponseWriter, r *http.Request) {
 }
 
 // snippetcreate handler function
-func snippetcreate(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.Header().Set("Allow", "POST")
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)

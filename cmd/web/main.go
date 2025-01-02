@@ -7,11 +7,16 @@ import (
 	"os"
 )
 
+type application struct {
+	errorLog *log.Logger
+	infoLog  *log.Logger
+}
+
 func main() {
 	//define command line with name addr, default 4000
 	// and some explaining what the flag control
 	// flag will be stored in the addr cariable at runtime
-	//VALUE IN POINTER
+	// VALUE IN POINTER
 	addr := flag.String("addr", ":4000", "HTTP Network Address")
 
 	flag.Parse()
@@ -24,15 +29,21 @@ func main() {
 	//instead, use stderr as destination, and Lshortfile to include relevant file
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
+	//initialize new instance of application struct
+	app := &application{
+		errorLog: errorLog,
+		infoLog:  infoLog,
+	}
+
 	mux := http.NewServeMux()
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet/view", snippetview)
-	mux.HandleFunc("/snippet/create", snippetcreate)
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("/snippet/view", app.snippetView)
+	mux.HandleFunc("/snippet/create", app.snippetCreate)
 
 	// initialize a new http.server struct. we set the addr and handler fields
 	// so that the server uses the same network address and routed ass before
