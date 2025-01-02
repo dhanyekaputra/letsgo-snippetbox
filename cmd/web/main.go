@@ -6,10 +6,15 @@ import (
 )
 
 func main() {
-	// Register the two new handler function to corresponding URL patterns
-	// with servemux
 
 	mux := http.NewServeMux()
+
+	// create files server which serves files out of the directory
+	// relative to the directory root
+	fileServer := http.FileServer(http.Dir("./ui/static/"))
+
+	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+
 	mux.HandleFunc("/", home)
 	mux.HandleFunc("/snippet/view", snippetview)
 	mux.HandleFunc("/snippet/create", snippetcreate)
