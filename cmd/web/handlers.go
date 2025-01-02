@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
+	"text/template"
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -13,16 +15,23 @@ func home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("Hello From Snippetbox"))
+	ts, err := template.ParseFiles("./ui/html/pages/home.tmpl.html")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 
 }
 
 // snippetview handleer function
 func snippetview(w http.ResponseWriter, r *http.Request) {
-	// extract the value of the id param from the query string and try to\
-	// convert it into an integer susing strconv.Atoi() function
-	// if the value cant be converted and less than 1 then we return
-	// a 404 not found response
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
@@ -34,18 +43,8 @@ func snippetview(w http.ResponseWriter, r *http.Request) {
 
 // snippetcreate handler function
 func snippetcreate(w http.ResponseWriter, r *http.Request) {
-	//Use r.Method to check whether the request is using POST or not
 	if r.Method != "POST" {
-		// if not use WriteHeader() method to send a 405 status
-		// code and Write() method to write message "Method Not Allowed"
-		// response body. Return from the function so that the subsequent code
-		// is not executed
 		w.Header().Set("Allow", "POST")
-		/// w.WriteHeader(405)
-		/// w.Write([]byte("Method Not Allowed"))
-
-		//Use the http.Error() function to send a 405 status code
-		// and "Method not allowed" strings as the response body
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
