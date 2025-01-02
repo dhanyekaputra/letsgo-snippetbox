@@ -1,8 +1,9 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"net/http"
+	"strconv"
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +19,17 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 // snippetview handleer function
 func snippetview(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Display specific snipeet"))
+	// extract the value of the id param from the query string and try to\
+	// convert it into an integer susing strconv.Atoi() function
+	// if the value cant be converted and less than 1 then we return
+	// a 404 not found response
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	fmt.Fprintf(w, "Display Specific Snippet With ID %d...", id)
 }
 
 // snippetcreate handler function
@@ -39,19 +50,4 @@ func snippetcreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write([]byte("Create new snippet"))
-}
-
-func main() {
-	// Register the two new handler function to corresponding URL patterns
-	// with servemux
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet/view", snippetview)
-	mux.HandleFunc("/snippet/create", snippetcreate)
-
-	log.Println("Starting server on :4000")
-	err := http.ListenAndServe(":4000", mux)
-	log.Fatal(err)
-
 }
