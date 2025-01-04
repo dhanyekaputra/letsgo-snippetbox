@@ -3,6 +3,9 @@ package main
 import "net/http"
 
 func (app *application) routes() *http.ServeMux {
+
+	// allocates and return new servemux (&ServeMux{})
+	// which is the address of new servemux
 	mux := http.NewServeMux()
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
