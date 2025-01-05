@@ -14,6 +14,9 @@ import (
 	"snippetbox.net/internal/models"
 )
 
+// define an application struct to hold the application-wide
+// dependencies for the web application
+
 // add snippets field
 // this will allow us to make the snippetmodel object available
 type application struct {
