@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"text/template"
 
 	"snippetbox.net/internal/models"
 )
@@ -30,26 +31,26 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 	////////////////////////////////////////
 
-	// files := []string{
-	// 	"./ui/html/base.tmpl.html",
-	// 	"./ui/html/partials/nav.tmpl.html",
-	// 	"./ui/html/pages/home.tmpl.html",
-	// }
-	// // use the template.Parsefiles function to read the template file into a
-	// // template set. Return the error to user
-	// ts, err := template.ParseFiles(files...)
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// 	return
-	// }
+	files := []string{
+		"./ui/html/base.tmpl.html",
+		"./ui/html/partials/nav.tmpl.html",
+		"./ui/html/pages/home.tmpl.html",
+	}
+	// use the template.Parsefiles function to read the template file into a
+	// template set. Return the error to user
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
 
-	// // Execute() method to write the content of the "base"
-	// // to response body
-	// err = ts.ExecuteTemplate(w, "base", nil)
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// 	return
-	// }
+	// Execute() method to write the content of the "base"
+	// to response body
+	err = ts.ExecuteTemplate(w, "base", nil)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
 
 }
 
@@ -74,7 +75,32 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%+v", snippet)
+	//initialize a slice containing the paths to the virw.tmpl files
+	// with layout we made earlier
+	files := []string{
+		"./ui/html/base.tmpl.html",
+		"./ui/html/partials/nav.tmpl.html",
+		"./ui/html/pages/home.tmpl.html",
+		"./ui/html/pages/view.tmpl.html",
+	}
+	//parse the template files
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	data := &templateData{
+		Snippet: snippet,
+	}
+
+	//execute and parsing.
+	//passing the snippet data as the final param
+	err = ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
 }
 
 // snippetcreate handler function
