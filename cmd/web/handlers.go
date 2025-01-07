@@ -31,31 +31,10 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// }
 	////////////////////////////////////////
 
-	files := []string{
-		"./ui/html/base.tmpl.html",
-		"./ui/html/partials/nav.tmpl.html",
-		"./ui/html/pages/home.tmpl.html",
-	}
-	// use the template.Parsefiles function to read the template file into a
-	// template set. Return the error to user
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	//instance templateData holding slice of snippets
-	data := &templateData{
+	// use the new render helpers
+	app.render(w, http.StatusOK, "home.tmpl.html", &templateData{
 		Snippets: snippets,
-	}
-
-	// Execute() method to write the content of the "base"
-	// to response body
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
+	})
 
 }
 

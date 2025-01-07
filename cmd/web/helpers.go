@@ -25,3 +25,24 @@ func (app *application) clientError(w http.ResponseWriter, status int) {
 func (app *application) notFound(w http.ResponseWriter) {
 	app.clientError(w, http.StatusNotFound)
 }
+
+func (app *application) render(w http.ResponseWriter, status int, page string, data *templateData) {
+	// retrieve the appropriate template set from the cache
+	// based on the page name ("like 'home.tmpl")
+	// return the error if exist
+	ts, ok := app.templateCache[page]
+	if !ok {
+		err := fmt.Errorf("template %s doesn't exist", page)
+		app.serverError(w, err)
+		return
+	}
+
+	// writeout the provided http status code
+	w.WriteHeader(status)
+
+	//execute the template set and write the response body
+	err := ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, err)
+	}
+}

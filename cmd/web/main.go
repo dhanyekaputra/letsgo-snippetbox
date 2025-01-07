@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -23,6 +24,8 @@ type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
 	snippets *models.SnippetModel
+	// add a templateCache field
+	templateCache map[string]*template.Template
 }
 
 const (
@@ -75,6 +78,12 @@ func main() {
 	// before the main function exit
 	defer db.Close()
 
+	// initizalize new template cache
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
 	//initialize new instance of application struct
 	// initialize a model.SnippetModel instance and add it
 	//to application dependencies
@@ -82,6 +91,8 @@ func main() {
 		errorLog: errorLog,
 		infoLog:  infoLog,
 		snippets: &models.SnippetModel{DB: db},
+		// add to app dependencies
+		templateCache: templateCache,
 	}
 
 	// initialize a new http.server struct. we set the addr and handler fields
