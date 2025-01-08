@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"text/template"
 
 	"snippetbox.net/internal/models"
 )
@@ -26,16 +25,13 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// for _, snippet := range snippets {
-	// 	fmt.Fprintf(w, "%+v\n", snippet)
-	// }
-	////////////////////////////////////////
+	// call the newTemplateData() helper to get a templateData struct containing
+	// the default data and add the snippet slice to it
+	data := app.newTemplateData(r)
+	data.Snippets = snippets
 
 	// use the new render helpers
-	app.render(w, http.StatusOK, "home.tmpl.html", &templateData{
-		Snippets: snippets,
-	})
-
+	app.render(w, http.StatusOK, "home.tmpl.html", data)
 }
 
 // snippetview handleer function
@@ -59,31 +55,13 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//initialize a slice containing the paths to the virw.tmpl files
-	// with layout we made earlier
-	files := []string{
-		"./ui/html/base.tmpl.html",
-		"./ui/html/partials/nav.tmpl.html",
-		"./ui/html/pages/home.tmpl.html",
-		"./ui/html/pages/view.tmpl.html",
-	}
-	//parse the template files
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
+	// call the newTemplateData() helper to get a templateData struct containing
+	// the default data and add the snippet slice to it
+	data := app.newTemplateData(r)
+	data.Snippet = snippet
 
-	data := &templateData{
-		Snippet: snippet,
-	}
-
-	//execute and parsing.
-	//passing the snippet data as the final param
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, err)
-	}
+	// use the new render helpers
+	app.render(w, http.StatusOK, "view.tmpl.html", data)
 
 }
 
